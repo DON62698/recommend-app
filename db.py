@@ -1,33 +1,23 @@
-import sqlite3
-import pandas as pd  # ← 必要
+import pandas as pd
 from datetime import datetime
+import os
 
-DB_NAME = "recommendation.db"
+CSV_FILE = "recommendations.csv"
 
-def init_db():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS recommendations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT,
-            employee TEXT,
-            method TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
+def init_data():
+    if not os.path.exists(CSV_FILE):
+        df = pd.DataFrame(columns=["date", "employee", "method"])
+        df.to_csv(CSV_FILE, index=False)
 
-def add_record(employee, method):
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO recommendations (date, employee, method) VALUES (?, ?, ?)",
-                   (datetime.today().strftime("%Y-%m-%d"), employee, method))
-    conn.commit()
-    conn.close()
+def add_record(employee, method, count=1):
+    date_today = datetime.today().strftime("%Y-%m-%d")
+    new_rows = pd.DataFrame([{"date": date_today, "employee": employee, "method": method}] * count)
+    df = pd.read_csv(CSV_FILE)
+    df = pd.concat([df, new_rows], ignore_index=True)
+    df.to_csv(CSV_FILE, index=False)
 
 def get_all_records():
-    conn = sqlite3.connect(DB_NAME)
-    df = pd.read_sql_query("SELECT * FROM recommendations", conn)
-    conn.close()
-    return df
+    if not os.path.exists(CSV_FILE):
+        return pd.DataFrame(columns=["date", "employee", "method"])
+    return pd.read_csv(CSV_FILE)
+
