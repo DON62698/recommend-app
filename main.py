@@ -18,12 +18,14 @@ with st.form("recommend_form"):
     employee = st.selectbox("員工姓名", ["山田", "佐藤", "鈴木"])
     method = st.selectbox("推薦方式", ["APP下載", "LINE登入", "LINE會員下載APP"])
     count = st.number_input("推薦次數", min_value=1, max_value=50, value=1, step=1)
+    selected_date = st.date_input("推薦日期", value=datetime.today())
 
     submitted = st.form_submit_button("送出紀錄")
     if submitted:
-        add_record(employee, method, count)
-        st.success(f"✅ 已新增 {count} 筆推薦：{employee} → {method}")
+        add_record(employee, method, count, selected_date.strftime('%Y-%m-%d'))
+        st.success(f"✅ 已新增 {count} 筆推薦：{employee} → {method}（日期：{selected_date.strftime('%Y-%m-%d')}）")
         st.rerun()
+
 
 # ====== 讀取所有紀錄 ======
 df = get_all_records()
